@@ -1,0 +1,58 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    <h1>{{ username }}</h1>
+
+    <div class="container">
+        <div class="row d-flex justify-content-center">
+            <h3 class="col-4">Followers: {{ followers.count }}</h3>
+            <h3 class="col-4">Following: {{ following.count }}</h3>
+            {% if user.is_authenticated %}
+                {% if user != user_profile %}
+                    {% if is_following %}
+                        <form action="{% url 'unfollow' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_follow" value="{{ user_profile }}" />
+                            <input type="submit" value="Unfollow" class="btn btn-danger" />
+                        </form>
+                    {% else %}
+                        <form action="{% url 'follow' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_follow" value="{{ user_profile }}" />
+                            <input type="submit" value="Follow" class="btn btn-success" />
+                        </form>
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="all-posts">
+        {% for post in posts_of_the_page %}
+            <div class="row post mx-5">
+                <h5 class="username"><a href="{% url 'profile' user_id=post.user.id %}">@{{ post.user }}</a></h5>
+                <p class="content"> {{ post.content }}</p>
+                <p class="date">{{ post.date }}</p>
+                
+                {% if post.id in user_likes %}
+                    <button class="btn btn-info fa fa-thumbs-down col-1" onClick="likeHandler({{ post.id }}, {{ user_likes }})" id="{{ post.id }}"</button> 
+                    {% else %}
+                    <button class="btn btn-info fa fa-thumbs-up col-1"  onClick="likeHandler({{ post.id }}, {{ user_likes }})" id="{{ post.id }}"</button> 
+                {% endif %}
+                
+            </div>
+            
+
+        {% endfor %}
+    </div>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination f-flex justy-content-center">
+            {% if posts_of_the_page.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ posts_of_the_page.previous_page_number }}">Previous</a></li>
+            {% endif %}
+            {% if posts_of_the_page.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ posts_of_the_page.next_page_number }}">Next</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endblock %}
